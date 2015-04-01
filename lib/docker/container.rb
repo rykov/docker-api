@@ -16,7 +16,8 @@ class Docker::Container
   # Wait for the current command to finish executing. Default wait time is
   # `Excon.options[:read_timeout]`.
   def wait(time = nil)
-    resp = connection.post(path_for(:wait), nil, :read_timeout => time)
+    excon_params = { :read_timeout => time, :idempotent => true }
+    resp = connection.post(path_for(:wait), nil, excon_params)
     Docker::Util.parse_json(resp)
   end
 
@@ -136,6 +137,12 @@ class Docker::Container
 
   def logs(opts = {})
     connection.get(path_for(:logs), opts)
+  end
+
+  def rename(new_name)
+    query = {}
+    query['name'] = new_name
+    connection.post(path_for(:rename), query)
   end
 
   def streaming_logs(opts = {}, &block)

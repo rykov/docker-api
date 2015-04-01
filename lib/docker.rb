@@ -3,8 +3,8 @@ require 'json'
 require 'excon'
 require 'tempfile'
 require 'base64'
+require 'find'
 require 'rubygems/package'
-require 'archive/tar/minitar'
 require 'uri'
 require 'open-uri'
 
@@ -46,6 +46,16 @@ module Docker
         client_key: File.join(cert_path, 'key.pem'),
         ssl_ca_file: File.join(cert_path, 'ca.pem'),
         scheme: 'https'
+      }.merge(ssl_options)
+    else
+      {}
+    end
+  end
+
+  def ssl_options
+    if ENV['DOCKER_SSL_VERIFY'] == 'false'
+      {
+        ssl_verify_peer: false
       }
     else
       {}
@@ -121,5 +131,5 @@ module Docker
   module_function :default_socket_url, :env_url, :url, :url=, :env_options,
                   :options, :options=, :creds, :creds=, :logger, :logger=,
                   :connection, :reset!, :reset_connection!, :version, :info,
-                  :authenticate!, :validate_version!
+                  :authenticate!, :validate_version!, :ssl_options
 end
